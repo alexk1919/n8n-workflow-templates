@@ -14,7 +14,7 @@ Each workflow is structured into its own folder for easy access and deployment.
 - [Contact](#contact)
 
 ## About
-This repository is a collection of powerful **n8n workflows** created and maintained by **AlexK1919**. Each workflow is built to:
+This repository is a collection of powerful **n8n workflow templates** created and maintained by **AlexK1919**. Each workflow is built to:
 - Automate repetitive tasks.
 - Integrate popular tools and platforms.
 - Optimize workflows using AI and API integrations.
@@ -30,6 +30,6 @@ Follow these steps to contribute:
 This project is licensed under the MIT License.
 
 ## Contact
-Created and maintained by [AlexK1919](https://beacons.ai/alexk1919).
+Created and maintained by [AlexK1919](https://wot-ai.com).
 
 Ready to automate your workflows? Let’s get started! 🚀

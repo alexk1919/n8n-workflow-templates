@@ -1,0 +1,649 @@
+{
+  "name": "Workflow Generator v2.2",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.output || $json.message || $json.text;\n\nif (!raw) {\n  throw new Error(\"Missing AI output text.\");\n}\n\nconst match = raw.match(/```json\\s*([\\s\\S]*?)```/);\nif (!match) {\n  throw new Error(\"No ```json code block found.\");\n}\n\nconst jsonString = match[1].trim();\n\ntry {\n  const parsed = JSON.parse(jsonString);\n\n  // ✅ Return as a proper n8n item\n  return [{ json: parsed }];\n} catch (err) {\n  throw new Error(\"Workflow JSON parse failed: \" + err.message);\n}\n"
+      },
+      "id": "4713d2f0-419f-4ec8-beae-778fb868d6b4",
+      "name": "Validate JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1420,
+        -300
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "workflowObject": "={{ $json.workflowObject.toJsonString() }}",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        -300
+      ],
+      "id": "6980dd43-2981-4222-a9fe-ec8cfd98feb1",
+      "name": "n8n",
+      "notesInFlow": false,
+      "credentials": {
+        "n8nApi": {
+          "id": "0XLL6lxiSB0ORf5Z",
+          "name": "AlexK1919 n8n ent account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Workflow Generator",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "example_json",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "acceptFileTypes": ".json"
+            },
+            {
+              "fieldLabel": "workflow_description",
+              "placeholder": "What do you want to generate?",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -3700,
+        -420
+      ],
+      "id": "9c778de4-11b9-4b3a-bcc3-140b4d194490",
+      "name": "On form submission",
+      "webhookId": "3a5cd5da-b69f-4c24-ab91-4a7fbad65211"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b5f82f6d-14cf-465f-9d6a-21a90a6154d1",
+              "name": "email",
+              "value": "={{ $('On form submission').item.json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "9e335b8e-1005-4535-b2ea-c1d94a4d517d",
+              "name": "workflow_description",
+              "value": "={{ $('On form submission').item.json.workflow_description }}",
+              "type": "string"
+            },
+            {
+              "id": "92dc9e78-a2a4-478b-8ff8-a16dbe3b17dd",
+              "name": "submittedAt",
+              "value": "={{ $('On form submission').item.json.submittedAt }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3040,
+        -300
+      ],
+      "id": "8964a148-f174-4435-96fd-c5954a06f1b2",
+      "name": "SET"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3d73b185-4b25-41a6-a59c-cb23f59cd3f2",
+              "leftValue": "={{ $json.example_json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -3440,
+        -420
+      ],
+      "id": "30868313-8f65-437a-8c66-28ca11737604",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "binaryPropertyName": "example_json",
+        "destinationKey": "example_json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -3220,
+        -500
+      ],
+      "id": "d5d949be-035f-4b8d-afbf-9e03646257e8",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.executionData",
+      "typeVersion": 1,
+      "position": [
+        -1420,
+        -40
+      ],
+      "id": "e6302635-44c3-424a-98bb-45e3892e1c73",
+      "name": "Execution Data"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.executionData",
+      "typeVersion": 1,
+      "position": [
+        -1660,
+        -80
+      ],
+      "id": "25755c2a-063f-4202-80af-ccfc7a003c6e",
+      "name": "Execution Data1"
+    },
+    {
+      "parameters": {
+        "jsCode": "/*****************************************************************\n * Validate Tools-Agent wiring\n *  - OpenAI Chat Model is required & wired via ai_languageModel\n *  - PGVector node is optional; if present it must be wired via ai_tool\n *  - Final workflow object is returned in  items[0].json.output\n *****************************************************************/\n\n// 1 ── Parse the generator’s text into a workflow object ────────\nlet raw = items[0].json.output ?? items[0].json;          // string or object\nif (typeof raw === 'string') {\n  raw = raw.replace(/```json|```/g, '').trim();           // strip fences\n  raw = JSON.parse(raw);\n}\nconst wf = raw;                                           // workflow object\n\n// 2 ── Helper look-ups ──────────────────────────────────────────\nconst cx            = wf.connections ?? {};\nconst nodesByName   = Object.fromEntries(wf.nodes.map(n => [n.name, n]));\nconst agentNodes    = wf.nodes.filter(n => n.type === '@n8n/n8n-nodes-langchain.agent');\n\nif (agentNodes.length === 0) {\n  // No Tools Agent → nothing to validate\n  return [{ json: { output: wf } }];\n}\nif (agentNodes.length > 1) {\n  throw new Error('More than one Tools Agent found');\n}\nconst agentName = agentNodes[0].name;\n\n// helper: check if “fromNode” links to agent via “port”\nconst linked = (fromNode, port) =>\n  cx[fromNode]?.[port]?.some(l => l.node === agentName);\n\n// 3 ── Mandatory Chat Model ────────────────────────────────────\nif (!nodesByName['OpenAI Chat Model']) {\n  throw new Error('Tools Agent present but OpenAI Chat Model node missing');\n}\nif (!linked('OpenAI Chat Model', 'ai_languageModel')) {\n  throw new Error('OpenAI Chat Model not connected to Tools Agent');\n}\n\n// 4 ── Optional PGVector: if present it must be wired correctly ─\nif (nodesByName['wfs Postgres PGVector'] &&\n    !linked('wfs Postgres PGVector', 'ai_tool')) {\n  throw new Error('PGVector node present but not connected to Tools Agent');\n}\n\n// 5 ── Everything is fine → pass workflow in .output ───────────\nreturn [{ json: { output: wf } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1660,
+        -300
+      ],
+      "id": "654283b9-d121-48ea-978a-3026bc749939",
+      "name": "Validate Tools AI Agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "repository",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "n8n-io",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "=n8n-docs",
+          "mode": "name"
+        }
+      },
+      "type": "n8n-nodes-base.githubTool",
+      "typeVersion": 1.1,
+      "position": [
+        -2280,
+        -60
+      ],
+      "id": "4ab3c2ad-6bbe-491d-8934-e0a831c3d0d4",
+      "name": "GitHub - n8n Docs",
+      "webhookId": "2c32ff68-1c26-4263-87c5-ee6ca29f4bbd",
+      "credentials": {
+        "githubApi": {
+          "id": "N9fwDUOdqYx2rmms",
+          "name": "Public Repos GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -2920,
+        140
+      ],
+      "id": "f47d8711-e193-43fe-835b-e0c299b55e65",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "fzLcLisovaZjIqma",
+          "name": "AlexK OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {
+          "maxTokens": -1,
+          "responseFormat": "json_object",
+          "timeout": 60000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -2920,
+        -60
+      ],
+      "id": "8d5f5ea0-061c-4695-8c24-1b68db7d8b27",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "fzLcLisovaZjIqma",
+          "name": "AlexK OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a2492d79-d47e-4bf4-a1c8-656d5aecc998",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1920,
+        -300
+      ],
+      "id": "39d899c4-d89b-4201-baa5-b55b18eaf0ab",
+      "name": "Stage 1 Report1"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "n8n_vectors_wfs",
+        "toolDescription": "n8n workflow examples, cheat sheet, tips and tricks and other n8n related information",
+        "tableName": "n8n_vectors_wfs",
+        "topK": 100,
+        "options": {
+          "collection": {
+            "values": {
+              "useCollection": true,
+              "collectionName": "n8n_wfs"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.1,
+      "position": [
+        -2760,
+        -60
+      ],
+      "id": "84f66a73-606a-4f06-884a-20cd93087c73",
+      "name": "wfs Postgres PGVector1",
+      "credentials": {
+        "postgres": {
+          "id": "qEKUhVkz6WOElfmm",
+          "name": "WOT-AI pgv-workflows"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        -2440,
+        -60
+      ],
+      "id": "06a10cc9-5440-4d96-bbac-186b8b946137",
+      "name": "Think1"
+    },
+    {
+      "parameters": {
+        "resource": "repository",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "n8n-io",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "=test-workflows",
+          "mode": "name"
+        }
+      },
+      "type": "n8n-nodes-base.githubTool",
+      "typeVersion": 1.1,
+      "position": [
+        -2120,
+        -60
+      ],
+      "id": "8d800f77-6dcc-465e-80d3-0b55d5d2581d",
+      "name": "GitHub - n8n Test Workflows",
+      "webhookId": "2c32ff68-1c26-4263-87c5-ee6ca29f4bbd",
+      "credentials": {
+        "githubApi": {
+          "id": "N9fwDUOdqYx2rmms",
+          "name": "Public Repos GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=### Task\n{{ $('On form submission').first().json.workflow_description }}\n\n### Example Workflow (optional)\n{{ JSON.stringify($('SET').item.json.example_json) }}\n\n### Retrieval Plan\n1. **Vector search**  \n   • Call `kb_search \"<full task + example>\"`.  \n   • Extract ≤ 5 high‑value keywords (APIs, node types, verbs).  \n   • For each keyword call `kb_search \"<keyword>\"`.  \n\n2. **GitHub fallback (only if < 3 snippets so far)**  \n   • Call `github_search \"<keyword> repo:n8n-io/test-workflows path:/workflows\"`  \n     *(up to three calls total).*  \n   • Keep the **five** most relevant snippets overall.  \n\n> Store snippets only in working memory—do **not** output raw tool responses.  \n> Each snippet must carry its `filename` so it can be cited later.\n\n### Build the Workflow\n1. Use the snippets to pick sensible defaults (trigger, auth, error handling, …).  \n2. If you include a **Tools Agent** (`@n8n/n8n-nodes-langchain.agent`) you **must**:  \n   • Wire **OpenAI Chat Model → ai_languageModel → Agent**  \n   • If you add **wfs Postgres PGVector**, wire **ai_tool → Agent**  \n3. Insert one Sticky Note at the top citing every filename you relied on.  \n4. Put all runtime options inside `parameters`; wrap code in `try/catch`.\n\n### Final Output  \nReturn **one** JSON object wrapped in a single ```json``` block, containing **only**:\n\n{\n  \"name\": \"<title>\",\n  \"active\": false,\n  \"nodes\": [ … ],\n  \"connections\": { … }\n}\n\nNo arrays, no extra keys, no markdown outside the code block.  \nIf the Tools Agent is present but mis‑wired, reply exactly  \n`{ \"error\": \"Mis‑wired Tools Agent\" }`.\n",
+        "options": {
+          "systemMessage": "=ROLE\nYou are a senior n8n Workflow Builder.\n\nTOOLS\n• kb_search  – vector KB snippets (fast, curated).  \n• github_search – GitHub code search; use queries like  \n  \"repo:n8n-io/test-workflows path:/workflows <keyword>\".\n\nPOLICY\n• Follow the Retrieval Plan above: vector first, GitHub only if needed.  \n• Never emit intermediate tool results—only the final workflow JSON.  \n• If you create a Tools Agent, it must be wired as specified; otherwise\n  omit it entirely.  \n• On validation failure output the exact error JSON requested by the user\n  message (no markdown, no text).\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -2760,
+        -300
+      ],
+      "id": "509af77f-3a2b-401d-9eb7-ae9ffe311379",
+      "name": "WOT-AI Workflow Generator"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"workflowObject\": {{ $json }}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1180,
+        -300
+      ],
+      "id": "064ee326-96e4-4fcf-b909-7b20dc6ff8cd",
+      "name": "SET for Publishing"
+    }
+  ],
+  "pinData": {
+    "On form submission": [
+      {
+        "json": {
+          "email": "info@wot-ai.com",
+          "example_json": null,
+          "workflow_description": "create a workflow that has tools ai agent using openai; the ai agent will review and alayize linkined posts for seentiment analisis",
+          "submittedAt": "2025-05-01T21:03:23.710+02:00",
+          "formMode": "test"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Validate JSON": {
+      "main": [
+        [
+          {
+            "node": "SET for Publishing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execution Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET": {
+      "main": [
+        [
+          {
+            "node": "WOT-AI Workflow Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SET",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "SET",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execution Data": {
+      "main": [
+        [
+          {
+            "node": "WOT-AI Workflow Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execution Data1": {
+      "main": [
+        [
+          {
+            "node": "WOT-AI Workflow Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Tools AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Validate JSON",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execution Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub - n8n Docs": {
+      "ai_tool": [
+        [
+          {
+            "node": "WOT-AI Workflow Generator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "wfs Postgres PGVector1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "WOT-AI Workflow Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "wfs Postgres PGVector1": {
+      "ai_tool": [
+        [
+          {
+            "node": "WOT-AI Workflow Generator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think1": {
+      "ai_tool": [
+        [
+          {
+            "node": "WOT-AI Workflow Generator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub - n8n Test Workflows": {
+      "ai_tool": [
+        [
+          {
+            "node": "WOT-AI Workflow Generator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WOT-AI Workflow Generator": {
+      "main": [
+        [
+          {
+            "node": "Stage 1 Report1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stage 1 Report1": {
+      "main": [
+        [
+          {
+            "node": "Validate Tools AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET for Publishing": {
+      "main": [
+        [
+          {
+            "node": "n8n",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b3e4d8c6-0a7c-4a2d-8396-c16a36ad7b37",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ecc960f484e18b0e09045fd93acf0d47f4cfff25cc212ea348a08ac3aae81850"
+  },
+  "id": "Q3FbcTdgnm8wIYGh",
+  "tags": [
+    {
+      "createdAt": "2025-02-20T17:17:53.411Z",
+      "updatedAt": "2025-02-20T17:17:53.411Z",
+      "id": "tUlWC9t8VhwpFaci",
+      "name": "Alex - WIP"
+    }
+  ]
+}
